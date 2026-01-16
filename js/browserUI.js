@@ -288,6 +288,8 @@ webviews.bindIPC('close-window', function (tabId, args) {
 })
 
 ipc.on('set-file-view', function (e, data) {
+  // Guard against tabs not being initialized yet
+  if (typeof tabs === 'undefined' || !tabs) return
   tabs.get().forEach(function (tab) {
     if (tab.url === data.url) {
       tabs.update(tab.id, { isFileView: data.isFileView })
