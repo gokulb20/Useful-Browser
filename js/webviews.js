@@ -10,7 +10,11 @@ var windowIsMaximized = false // affects navbar height on Windows
 var windowIsFullscreen = false
 
 function captureCurrentTab (options) {
-  if (tabs.get(tabs.getSelected()).private) {
+  // Guard against tabs not being initialized yet
+  if (typeof tabs === 'undefined' || !tabs) return
+  var selectedTab = tabs.getSelected()
+  if (!selectedTab || !tabs.get(selectedTab)) return
+  if (tabs.get(selectedTab).private) {
     // don't capture placeholders for private tabs
     return
   }
