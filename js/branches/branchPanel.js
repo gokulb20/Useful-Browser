@@ -1,9 +1,22 @@
 // Branch Browser - Sidebar Panel Component
 // Renders the branch tree, breadcrumbs, and handles user interactions
 
-var branchState = require('branches/branchState.js')
+// Lazy-loaded modules to avoid crashing if they fail
+var branchState = null
 var browserUI = require('browserUI.js')
 var webviews = require('webviews.js')
+
+// Safely get branchState module (lazy load with error handling)
+function getBranchState () {
+  if (branchState) return branchState
+  try {
+    branchState = require('branches/branchState.js')
+    return branchState
+  } catch (e) {
+    console.warn('[BranchPanel] Failed to load branchState:', e.message)
+    return null
+  }
+}
 
 // Safe accessor for global `tabs` which may be undefined during initialization
 // (window.tabs is set by tasks.setSelected() which happens in sessionRestore)
@@ -75,8 +88,15 @@ var branchPanel = {
     // Delay to ensure tabs are loaded first
     var self = this
     setTimeout(async function () {
+      var bs = getBranchState()
+      if (!bs) {
+        console.warn('[BranchPanel] branchState not available, skipping ROOT setup')
+        self.render()
+        return
+      }
+
       // Ensure ROOT exists
-      var root = branchState.getRoot()
+      var root = bs.getRoot()
       if (!root) {
         console.log('[BranchPanel] No ROOT found, creating one')
         // Get the first tab or create one (safeTabs may be null during init)
@@ -84,7 +104,7 @@ var branchPanel = {
         if (selectedTab) {
           // Use the first/selected tab as ROOT
           // Keep it as blank new tab page - that IS the ROOT
-          await branchState.ensureRoot(selectedTab)
+          await bs.ensureRoot(selectedTab)
         } else {
           // No tabs exist - will be created by default tab behavior
           console.log('[BranchPanel] No tabs found, ROOT will be created when first tab opens')
@@ -239,9 +259,12 @@ var branchPanel = {
 
   collapseAll: function () {
     var self = this
-    var allBranches = branchState.getAll()
+    var bs = getBranchState()
+    if (!bs) return
+
+    var allBranches = bs.getAll()
     allBranches.forEach(function (branch) {
-      var children = branchState.getChildren(branch.id)
+      var children = bs.getChildren(branch.id)
       if (children && children.length > 0) {
         self.collapsedBranches.add(branch.id)
       }
@@ -401,14 +424,17 @@ var branchPanel = {
     tasks.on('tab-updated', function (tabId, key) {
       if (key === 'title' || key === 'url') {
         // Update the branch with new title/url
-        var branch = branchState.getByTabId(tabId)
-        if (branch) {
-          var tab = tabs.get(tabId)
-          if (tab) {
-            var updates = {}
-            if (key === 'title' && tab.title) updates.title = tab.title
-            if (key === 'url' && tab.url) updates.url = tab.url
-            branchState.update(branch.id, updates)
+        var bs = getBranchState()
+        if (bs) {
+          var branch = bs.getByTabId(tabId)
+          if (branch) {
+            var tab = tabs.get(tabId)
+            if (tab) {
+              var updates = {}
+              if (key === 'title' && tab.title) updates.title = tab.title
+              if (key === 'url' && tab.url) updates.url = tab.url
+              bs.update(branch.id, updates)
+            }
           }
         }
         self.render()
@@ -437,7 +463,8 @@ var branchPanel = {
       this.breadcrumbContainer.removeChild(this.breadcrumbContainer.firstChild)
     }
 
-    var branch = branchState.getByTabId(selectedTabId)
+    var bs = getBranchState()
+    var branch = bs ? bs.getByTabId(selectedTabId) : null
     if (!branch) {
       // No branch found, show tab title as single breadcrumb
       var tab = safeTabs() ? safeTabs().get(selectedTabId) : null
@@ -614,7 +641,8 @@ var branchPanel = {
   render: function () {
     if (!this.treeContainer) return
 
-    var tree = branchState.getTree()
+    var bs = getBranchState()
+    var tree = bs ? bs.getTree() : []
     var selectedTabId = safeTabs() ? safeTabs().getSelected() : null
 
     // Clear existing content safely
@@ -626,7 +654,7 @@ var branchPanel = {
     // Only show ROOT's children at depth 0
     var self = this
     tree.forEach(function (rootBranch) {
-      if (branchState.isRoot(rootBranch.id)) {
+      if (bs && bs.isRoot(rootBranch.id)) {
         // Skip ROOT, render its children at depth 0
         if (rootBranch.children && rootBranch.children.length > 0) {
           rootBranch.children.forEach(function (child) {
@@ -796,10 +824,11 @@ var branchPanel = {
   updateActiveIndicator: function () {
     var selectedTabId = safeTabs() ? safeTabs().getSelected() : null
     var items = this.treeContainer.querySelectorAll('.branch-item')
+    var bs = getBranchState()
 
     items.forEach(function (item) {
       var branchId = item.getAttribute('data-branch-id')
-      var branch = branchState.get(branchId)
+      var branch = bs ? bs.get(branchId) : null
       var isActive = branch && branch.tabId === selectedTabId
 
       item.classList.toggle('active', isActive)
@@ -813,9 +842,10 @@ var branchPanel = {
   updateStatus: function () {
     if (!this.statusContainer) return
 
-    var count = branchState.count()
+    var bs = getBranchState()
+    var count = bs ? bs.count() : 0
     // Don't count ROOT in the display - it's invisible
-    if (branchState.getRoot()) {
+    if (bs && bs.getRoot()) {
       count = Math.max(0, count - 1)
     }
     this.statusContainer.textContent = count + ' branch' + (count !== 1 ? 'es' : '')
@@ -848,7 +878,8 @@ var branchPanel = {
     menu.appendChild(sep1)
 
     // Close branch (but not ROOT)
-    if (!branchState.isRoot(branch.id)) {
+    var bs = getBranchState()
+    if (!bs || !bs.isRoot(branch.id)) {
       var closeItem = document.createElement('div')
       closeItem.className = 'branch-context-menu-item'
       closeItem.innerHTML = '<i class="i carbon:close"></i> Close Branch'
@@ -931,7 +962,8 @@ var branchPanel = {
 
   closeBranch: function (branch) {
     // Prevent closing ROOT branch
-    if (branchState.isRoot(branch.id)) {
+    var bs = getBranchState()
+    if (bs && bs.isRoot(branch.id)) {
       console.log('[BranchPanel] Cannot close ROOT branch')
       return
     }
@@ -946,29 +978,35 @@ var branchPanel = {
       browserUI.closeTab(branch.tabId)
     } else {
       // Tab doesn't exist, just remove the branch from state
-      branchState.destroy(branch.id)
+      if (bs) bs.destroy(branch.id)
       this.render()
     }
   },
 
   clearStaleBranches: function () {
     console.log('[BranchPanel] Clearing stale branches')
-    var allBranches = branchState.getAll()
-    var root = branchState.getRoot()
-    var rootBranchId = branchState.getRootBranchId()
+    var bs = getBranchState()
+    if (!bs) {
+      console.warn('[BranchPanel] branchState not available, skipping cleanup')
+      return
+    }
+
+    var allBranches = bs.getAll()
+    var root = bs.getRoot()
+    var rootBranchId = bs.getRootBranchId()
     var staleCount = 0
     var reparentedCount = 0
 
     allBranches.forEach(function (branch) {
       // Skip the ROOT branch - never delete it
-      if (branchState.isRoot(branch.id)) {
+      if (bs.isRoot(branch.id)) {
         return
       }
 
       // Branch is stale if its tab doesn't exist
       // (Only check if safeTabs is available; skip cleanup during initialization)
       if (safeTabs() && (!branch.tabId || !safeTabs().get(branch.tabId))) {
-        branchState.destroy(branch.id)
+        bs.destroy(branch.id)
         staleCount++
         return
       }
@@ -977,7 +1015,7 @@ var branchPanel = {
       // (Branches that have no parentId but aren't ROOT)
       if (!branch.parentId && root) {
         console.log('[BranchPanel] Re-parenting orphan branch', branch.id, 'to ROOT')
-        branchState.update(branch.id, { parentId: rootBranchId })
+        bs.update(branch.id, { parentId: rootBranchId })
         reparentedCount++
       }
     })

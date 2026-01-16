@@ -171,32 +171,43 @@ require('sessionRestore.js').initialize()
 // require('newTabPage.js').initialize()  // Disabled - not needed for MVP
 // require('macHandoff.js').initialize()  // Disabled - not needed for MVP
 
-// Branch Browser: TEMPORARILY DISABLED to debug white screen
-// The branch modules cause errors during webpack chunk loading
-// TODO: Fix branch modules and re-enable
-/*
-var database = require('util/database.js')
-database.dbReady.then(async function () {
-  console.log('[BranchBrowser] Database ready, initializing branches...')
+// Branch Browser: Initialize branch modules with robust error handling
+// The modules use lazy loading and graceful degradation, so even if
+// parts fail, the sidebar/buttons should still work
+;(function initBranchModules () {
+  console.log('[BranchBrowser] Starting branch module initialization...')
+
+  // First, initialize branchPanel (handles sidebar UI, buttons, etc.)
+  // This should work even without branchState/database
   try {
-    await require('branches/branchEvents.js').initialize()
-  } catch (e) {
-    console.error('[BranchBrowser] branchEvents init failed:', e)
-  }
-  try {
-    require('branches/branchPanel.js').initialize()
+    var branchPanel = require('branches/branchPanel.js')
+    branchPanel.initialize()
+    console.log('[BranchBrowser] branchPanel initialized successfully')
   } catch (e) {
     console.error('[BranchBrowser] branchPanel init failed:', e)
   }
-}).catch(function (e) {
-  console.error('[BranchBrowser] Database ready failed:', e)
+
+  // Then try to initialize branchEvents (handles branch creation on navigation)
+  // This requires database, so wrap in dbReady
   try {
-    require('branches/branchPanel.js').initialize()
-  } catch (e2) {
-    console.error('[BranchBrowser] branchPanel fallback init failed:', e2)
+    var database = require('util/database.js')
+    database.dbReady.then(async function () {
+      console.log('[BranchBrowser] Database ready, initializing branchEvents...')
+      try {
+        await require('branches/branchEvents.js').initialize()
+        console.log('[BranchBrowser] branchEvents initialized successfully')
+      } catch (e) {
+        console.error('[BranchBrowser] branchEvents init failed:', e)
+      }
+    }).catch(function (e) {
+      console.error('[BranchBrowser] Database ready failed:', e)
+      // branchPanel is already initialized, so sidebar still works
+    })
+  } catch (e) {
+    console.error('[BranchBrowser] Failed to load database module:', e)
+    // branchPanel is already initialized, so sidebar still works
   }
-})
-*/
+})();
 
 // default searchbar plugins
 
