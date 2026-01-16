@@ -169,6 +169,7 @@ require('newTabPage.js').initialize()
 require('macHandoff.js').initialize()
 
 // Branch Browser: Initialize branches after database is ready
+// NOTE: Session restore runs UNCONDITIONALLY below - branches catch up via events
 var database = require('util/database.js')
 database.dbReady.then(async function () {
   console.log('[BranchBrowser] Database ready, initializing branches...')
@@ -182,12 +183,14 @@ database.dbReady.then(async function () {
   } catch (e) {
     console.error('[BranchBrowser] branchPanel init failed:', e)
   }
-
-  // Restore session AFTER branch listeners are ready
-  // This ensures tabs trigger branch creation
-  require('sessionRestore.js').restore()
 }).catch(function (e) {
   console.error('[BranchBrowser] Database ready failed:', e)
+  // Still try to initialize the panel even if DB/branch events fail
+  try {
+    require('branches/branchPanel.js').initialize()
+  } catch (e2) {
+    console.error('[BranchBrowser] branchPanel fallback init failed:', e2)
+  }
 })
 
 // default searchbar plugins
@@ -206,5 +209,7 @@ require('searchbar/historyViewer.js').initialize()
 require('searchbar/shortcutButtons.js').initialize()
 require('searchbar/calculatorPlugin.js').initialize()
 
-// Note: sessionRestore.restore() moved to dbReady.then() above
-// to ensure branch listeners are ready before tabs are created
+// CRITICAL: Session restore runs UNCONDITIONALLY
+// This ensures the browser always works, even if branches fail to initialize
+// Branch events will catch tab-added events when dbReady resolves
+require('sessionRestore.js').restore()
