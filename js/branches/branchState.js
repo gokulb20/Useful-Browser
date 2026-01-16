@@ -1,7 +1,28 @@
 // Branch state management for Branch Browser
 // Handles CRUD operations and IndexedDB persistence
 
-var { db } = require('util/database.js')
+var database = null
+var db = null
+var dbReady = null
+
+// Lazy load database to avoid crashing if it fails
+function getDb () {
+  if (db) return db
+  try {
+    database = require('util/database.js')
+    db = database.db
+    dbReady = database.dbReady
+    return db
+  } catch (e) {
+    console.warn('[BranchState] Failed to load database:', e.message)
+    return null
+  }
+}
+
+// Check if database is ready for operations
+function isDbReady () {
+  return db !== null && dbReady !== null
+}
 
 // ROOT branch constants - the permanent home base
 // ROOT is a blank starting point - the search bar is the interface
@@ -42,12 +63,17 @@ async function create (tabId, parentId, url, title) {
   // Store in memory
   branches[branchId] = branch
 
-  // Persist to IndexedDB
-  try {
-    await db.branches.put(branch)
-    console.log('[Branch] Created:', branchId, parentId ? `(child of ${parentId})` : '(root)')
-  } catch (e) {
-    console.error('[Branch] Failed to persist:', e)
+  // Persist to IndexedDB (if available)
+  var database = getDb()
+  if (database) {
+    try {
+      await database.branches.put(branch)
+      console.log('[Branch] Created:', branchId, parentId ? `(child of ${parentId})` : '(root)')
+    } catch (e) {
+      console.error('[Branch] Failed to persist:', e)
+    }
+  } else {
+    console.log('[Branch] Created (memory only):', branchId)
   }
 
   return branchId
@@ -78,11 +104,14 @@ async function update (branchId, data) {
   // Update in memory
   Object.assign(branches[branchId], data)
 
-  // Persist to IndexedDB
-  try {
-    await db.branches.put(branches[branchId])
-  } catch (e) {
-    console.error('[Branch] Failed to update:', e)
+  // Persist to IndexedDB (if available)
+  var database = getDb()
+  if (database) {
+    try {
+      await database.branches.put(branches[branchId])
+    } catch (e) {
+      console.error('[Branch] Failed to update:', e)
+    }
   }
 
   return true
@@ -137,11 +166,14 @@ async function destroy (branchId) {
 
   console.log('[Branch] Destroying:', branchId)
 
-  // Remove from IndexedDB
-  try {
-    await db.branches.delete(branchId)
-  } catch (e) {
-    console.error('[Branch] Failed to delete:', e)
+  // Remove from IndexedDB (if available)
+  var database = getDb()
+  if (database) {
+    try {
+      await database.branches.delete(branchId)
+    } catch (e) {
+      console.error('[Branch] Failed to delete:', e)
+    }
   }
 
   // Remove from memory
@@ -230,8 +262,14 @@ function count () {
 
 // Load branches from IndexedDB on startup
 async function loadFromDB () {
+  var database = getDb()
+  if (!database) {
+    console.warn('[Branch] Database not available, skipping load')
+    return
+  }
+
   try {
-    var storedBranches = await db.branches.toArray()
+    var storedBranches = await database.branches.toArray()
     storedBranches.forEach(function (branch) {
       branches[branch.id] = branch
     })
@@ -243,13 +281,17 @@ async function loadFromDB () {
 
 // Clear all branches (for debugging)
 async function clearAll () {
-  try {
-    await db.branches.clear()
-    branches = {}
-    console.log('[Branch] Cleared all branches')
-  } catch (e) {
-    console.error('[Branch] Failed to clear:', e)
+  var database = getDb()
+  if (database) {
+    try {
+      await database.branches.clear()
+      console.log('[Branch] Cleared all branches from database')
+    } catch (e) {
+      console.error('[Branch] Failed to clear database:', e)
+    }
   }
+  branches = {}
+  console.log('[Branch] Cleared all branches from memory')
 }
 
 // Build tree structure for UI
@@ -307,12 +349,17 @@ async function ensureRoot (tabId) {
 
   branches[ROOT_BRANCH_ID] = root
 
-  // Persist to IndexedDB
-  try {
-    await db.branches.put(root)
-    console.log('[Branch] Created ROOT branch')
-  } catch (e) {
-    console.error('[Branch] Failed to persist ROOT:', e)
+  // Persist to IndexedDB (if available)
+  var database = getDb()
+  if (database) {
+    try {
+      await database.branches.put(root)
+      console.log('[Branch] Created ROOT branch')
+    } catch (e) {
+      console.error('[Branch] Failed to persist ROOT:', e)
+    }
+  } else {
+    console.log('[Branch] Created ROOT branch (memory only)')
   }
 
   return ROOT_BRANCH_ID
