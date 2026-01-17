@@ -774,3 +774,50 @@ body:has(#branch-sidebar.collapsed-minimal) #searchbar {
 .header-branch-btn {
   display: none;
 }
+
+/* =========================================
+   BOTTOM TOOLBAR - Chrome-style
+   ========================================= */
+
+#sidebar-bottom-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.toolbar-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.toolbar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.toolbar-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Collapsed mode: center the + button, hide grid */
+#branch-sidebar.collapsed-minimal #sidebar-bottom-toolbar {
+  justify-content: center;
+}
+
+#branch-sidebar.collapsed-minimal #sidebar-grid-btn {
+  display: none;
+}
