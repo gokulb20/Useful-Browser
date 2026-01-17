@@ -421,7 +421,7 @@ var branchPanel = {
         var tabData = tabs.get(selectedTab)
         console.log('[BranchPanel] Tab data:', tabData)
 
-        if (!tabData || !tabData.url || tabData.url === 'min://newtab') {
+        if (!tabData || !tabData.url || tabData.url === 'useful://newtab') {
           // Current tab is empty (new tab page), navigate in it
           console.log('[BranchPanel] Empty tab, updating webview')
           webviews.update(selectedTab, url)

@@ -1,4 +1,5 @@
-const UPDATE_URL = 'https://minbrowser.org/min/updates/latestVersion.json'
+// Update notifications disabled - set up your own endpoint to enable
+const UPDATE_URL = null // 'https://usefulventures.co/browser/updates/latestVersion.json'
 
 var settings = require('util/settings/settings.js')
 
@@ -16,6 +17,10 @@ function getUpdateRandomNum () {
 }
 
 function getAvailableUpdates () {
+  if (!UPDATE_URL) {
+    console.info('update checking disabled - no update URL configured')
+    return
+  }
   if (settings.get('updateNotificationsEnabled') !== false) {
     console.info('checking for updates')
     fetch(UPDATE_URL, {

@@ -1,9 +1,9 @@
 {
-  "name": "min",
-  "productName": "Min",
-  "author": "PalmerAL",
-  "version": "1.35.2",
-  "description": "A fast, minimal browser that protects your privacy",
+  "name": "useful-browser",
+  "productName": "Useful Browser",
+  "author": "Useful Ventures <hello@usefulventures.co>",
+  "version": "1.0.0",
+  "description": "A browser that thinks the way you do. The ADHD-friendly browser.",
   "electronVersion": "38.3.0",
   "main": "main.build.js",
   "standard": {
@@ -59,7 +59,11 @@
     "snazzy": "^9.0.0",
     "standard": "^14.3.4"
   },
-  "license": "Apache-2.0",
+  "license": "MIT",
+  "homepage": "https://usefulventures.co/browser",
+  "bugs": {
+    "url": "https://github.com/usefulventures/browser/issues"
+  },
   "scripts": {
     "postinstall": "node ./scripts/setupDevEnv.js",
     "test": "standard --verbose js/**/*.js main/*.js",
@@ -85,6 +89,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/minbrowser/min.git"
+    "url": "https://github.com/usefulventures/browser.git"
   }
 }

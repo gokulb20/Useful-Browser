@@ -1,12 +1,12 @@
 ---
 name: Bug report
-about: Report unexpected behavior in Min
+about: Report unexpected behavior in Useful Browser
 title: ""
 labels: bug
 assignees: ""
 ---
 
-- **Min Version:**
+- **Useful Browser Version:**
 - **Operating system:**
 <!-- e.g. "Windows 10", "macOS 10.14" -->
 
