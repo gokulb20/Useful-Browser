@@ -208,6 +208,36 @@ var branchPanel = {
       })
     }
 
+    // Bottom toolbar: Grid button (opens task overlay)
+    var gridBtn = document.getElementById('sidebar-grid-btn')
+    if (gridBtn) {
+      console.log('[BranchPanel] Attaching grid button handler')
+      gridBtn.addEventListener('click', function () {
+        console.log('[BranchPanel] Grid button clicked - opening task overlay')
+        try {
+          var taskOverlay = require('taskOverlay/taskOverlay.js')
+          taskOverlay.toggle()
+        } catch (e) {
+          console.error('[BranchPanel] Failed to open task overlay:', e)
+        }
+      })
+    }
+
+    // Bottom toolbar: New tab button (opens spotlight overlay)
+    var newTabToolbarBtn = document.getElementById('sidebar-new-tab-btn')
+    if (newTabToolbarBtn) {
+      console.log('[BranchPanel] Attaching new tab toolbar button handler')
+      newTabToolbarBtn.addEventListener('click', function () {
+        console.log('[BranchPanel] New tab toolbar button clicked - opening spotlight')
+        try {
+          var spotlightOverlay = require('spotlight/spotlightOverlay.js')
+          spotlightOverlay.show()
+        } catch (e) {
+          console.error('[BranchPanel] Failed to open spotlight:', e)
+        }
+      })
+    }
+
     // URL Input: Navigate on Enter key, cancel on Escape
     if (this.urlInput) {
       console.log('[BranchPanel] Attaching URL input handler')
