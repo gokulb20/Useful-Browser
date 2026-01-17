@@ -54,6 +54,7 @@ var branchPanel = {
   collapsedBranches: new Set(),
   pinnedSites: [],
   contextMenu: null,
+  isNewTabMode: false, // Track if we're creating a new tab vs navigating current
 
   initialize: function () {
     this.container = document.getElementById('branch-sidebar')
@@ -207,18 +208,42 @@ var branchPanel = {
       })
     }
 
-    // URL Input: Navigate on Enter key
+    // URL Input: Navigate on Enter key, cancel on Escape
     if (this.urlInput) {
       console.log('[BranchPanel] Attaching URL input handler')
       this.urlInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
           var url = self.urlInput.value.trim()
-          console.log('[BranchPanel] URL input Enter pressed, value:', url)
+          console.log('[BranchPanel] URL input Enter pressed, value:', url, 'isNewTabMode:', self.isNewTabMode)
           if (url) {
             self.navigateToUrl(url)
             self.urlInput.value = ''
             self.urlInput.blur()
+          } else if (self.isNewTabMode) {
+            // Empty input in new tab mode - just cancel
+            self.cancelNewTabMode()
           }
+        } else if (e.key === 'Escape') {
+          console.log('[BranchPanel] URL input Escape pressed')
+          if (self.isNewTabMode) {
+            self.cancelNewTabMode()
+          } else {
+            self.urlInput.value = ''
+            self.urlInput.blur()
+          }
+          e.preventDefault()
+        }
+      })
+
+      // Also cancel new tab mode when input loses focus
+      this.urlInput.addEventListener('blur', function () {
+        if (self.isNewTabMode && !self.urlInput.value.trim()) {
+          // Only cancel if empty - user might have clicked away temporarily
+          setTimeout(function () {
+            if (self.isNewTabMode && document.activeElement !== self.urlInput) {
+              self.cancelNewTabMode()
+            }
+          }, 100)
         }
       })
     } else {
@@ -320,8 +345,46 @@ var branchPanel = {
     }
   },
 
+  // Focus the sidebar URL input for new tab creation
+  // When user presses Enter, a new tab is created and navigated
+  focusUrlInput: function () {
+    if (!this.urlInput) {
+      console.warn('[BranchPanel] URL input not found')
+      return
+    }
+
+    // If sidebar is collapsed, expand it first
+    if (this.isSidebarCollapsed) {
+      this.toggleSidebar()
+    }
+
+    // Enter new tab mode - next Enter will create a new tab
+    this.isNewTabMode = true
+    this.urlInput.value = ''
+    this.urlInput.focus()
+    this.urlInput.placeholder = 'Enter URL for new tab...'
+
+    console.log('[BranchPanel] focusUrlInput called, isNewTabMode:', this.isNewTabMode)
+  },
+
+  // Cancel new tab mode and return focus to current page
+  cancelNewTabMode: function () {
+    this.isNewTabMode = false
+    if (this.urlInput) {
+      this.urlInput.value = ''
+      this.urlInput.blur()
+      this.urlInput.placeholder = 'Search or enter URL...'
+    }
+    // Return focus to webview
+    var selectedTab = safeTabs() ? safeTabs().getSelected() : null
+    if (selectedTab) {
+      webviews.callAsync(selectedTab, 'focus')
+    }
+    console.log('[BranchPanel] cancelNewTabMode called')
+  },
+
   navigateToUrl: function (input) {
-    console.log('[BranchPanel] navigateToUrl called with:', input)
+    console.log('[BranchPanel] navigateToUrl called with:', input, 'isNewTabMode:', this.isNewTabMode)
     var url = input
 
     // Check if it's a URL or search query
@@ -335,16 +398,30 @@ var branchPanel = {
       console.log('[BranchPanel] Added https:// prefix, URL:', url)
     }
 
-    // Navigate in current tab or create new one
-    var selectedTab = tabs.getSelected()
-    console.log('[BranchPanel] Selected tab:', selectedTab)
-
     try {
+      // In new tab mode, always create a new tab
+      if (this.isNewTabMode) {
+        console.log('[BranchPanel] New tab mode - creating new tab with URL:', url)
+        var newTabId = tabs.add({ url: url })
+        browserUI.addTab(newTabId, { enterEditMode: false })
+        // Reset new tab mode
+        this.isNewTabMode = false
+        if (this.urlInput) {
+          this.urlInput.placeholder = 'Search or enter URL...'
+        }
+        console.log('[BranchPanel] New tab created:', newTabId)
+        return
+      }
+
+      // Normal mode: navigate in current tab or create new one
+      var selectedTab = tabs.getSelected()
+      console.log('[BranchPanel] Selected tab:', selectedTab)
+
       if (selectedTab) {
         var tabData = tabs.get(selectedTab)
         console.log('[BranchPanel] Tab data:', tabData)
 
-        if (!tabData || !tabData.url) {
+        if (!tabData || !tabData.url || tabData.url === 'min://newtab') {
           // Current tab is empty (new tab page), navigate in it
           console.log('[BranchPanel] Empty tab, updating webview')
           webviews.update(selectedTab, url)

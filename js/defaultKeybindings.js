@@ -7,6 +7,7 @@ var tabEditor = require('navbar/tabEditor.js')
 var urlParser = require('util/urlParser.js')
 var keyMapModule = require('util/keyMap.js')
 var settings = require('util/settings/settings.js')
+var branchPanel = require('branches/branchPanel.js')
 
 var keyMap = keyMapModule.userKeyMap(settings.get('keyMap'))
 
@@ -28,37 +29,15 @@ const defaultKeybindings = {
         return
       }
 
-      browserUI.addTab()
+      // Focus sidebar URL input - tab is created when user presses Enter
+      branchPanel.focusUrlInput()
     })
 
-    // Alt+T / Option+T - Create a new tab truly in the background
-    // User stays on current page, new tab appears in tab bar with visual glow
-    // User can click on it later or use Cmd+Tab to switch to it
-    keybindings.defineShortcut('addBackgroundTab', function () {
-      if (modalMode.enabled()) {
-        return
-      }
-
-      if (focusMode.enabled()) {
-        focusMode.warn()
-        return
-      }
-
-      var newTabId = tabs.add({
-        isBackgroundTab: true
-      })
-      browserUI.addTab(newTabId, {
-        enterEditMode: false,
-        openInBackground: true  // True background - don't switch to it at all
-      })
-
-      // Show brief visual notification that tab was created
-      browserUI.showBackgroundTabNotification()
-    })
+    // addBackgroundTab shortcut removed - use Cmd+T for new tabs
 
     // Shift+Alt+T / Shift+Option+T - Create a sibling tab (same branch level)
     // For branch-based navigation: creates a tab at the same level, not as a child
-    // Opens edit mode so user can enter URL, with green accent visual indicator
+    // Focus sidebar URL input - tab is created when user presses Enter
     keybindings.defineShortcut('addSiblingTab', function () {
       if (modalMode.enabled()) {
         return
@@ -69,18 +48,9 @@ const defaultKeybindings = {
         return
       }
 
-      var currentTab = tabs.get(tabs.getSelected())
-      var newTabId = tabs.add({
-        // Pass the parent's branch info so this becomes a sibling, not a child
-        parentBranchId: currentTab ? currentTab.parentBranchId : null,
-        isSiblingTab: true
-      })
-      browserUI.addTab(newTabId, {
-        enterEditMode: true,
-        openInBackground: false
-      })
-      // Mark this as a sibling tab for visual feedback (green accent)
-      document.body.classList.add('sibling-tab-mode')
+      // Focus sidebar URL input - tab is created when user presses Enter
+      // Note: sibling tab behavior (same branch level) handled in branchPanel
+      branchPanel.focusUrlInput()
     })
 
     keybindings.defineShortcut('addPrivateTab', function () {

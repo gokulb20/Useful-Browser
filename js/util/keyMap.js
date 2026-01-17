@@ -1,7 +1,7 @@
 var defaultKeyMap = {
   quitMin: 'mod+q',
   addTab: 'mod+t',
-  addBackgroundTab: 'option+t',
+  // addBackgroundTab removed - use Cmd+T for new tabs
   addSiblingTab: 'shift+option+t',
   addPrivateTab: 'shift+mod+p',
   duplicateTab: 'shift+mod+d',
