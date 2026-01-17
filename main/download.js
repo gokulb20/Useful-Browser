@@ -96,7 +96,7 @@ function listenForDownloadHeaders (ses) {
     reader and PDF internal pages get universal access to web resources
     Note: we can't limit to the URL in the query string, because there could be redirects
     */
-    if (details.webContents && (details.webContents.getURL().startsWith('min://app/pages/pdfViewer') || details.webContents.getURL().startsWith('min://app/reader/') || details.webContents.getURL() === 'min://app/index.html')) {
+    if (details.webContents && (details.webContents.getURL().startsWith('useful://app/pages/pdfViewer') || details.webContents.getURL().startsWith('useful://app/reader/') || details.webContents.getURL() === 'useful://app/index.html')) {
       const filteredHeaders = Object.fromEntries(
         Object.entries(details.responseHeaders).filter(([key, val]) => key.toLowerCase() !== 'access-control-allow-origin' && key.toLowerCase() !== 'access-control-allow-credentials')
       )
@@ -104,7 +104,7 @@ function listenForDownloadHeaders (ses) {
       callback({
         responseHeaders: {
           ...filteredHeaders,
-          'Access-Control-Allow-Origin': 'min://app',
+          'Access-Control-Allow-Origin': 'useful://app',
           'Access-Control-Allow-Credentials': 'true'
         }
       })

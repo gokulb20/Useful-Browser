@@ -47,7 +47,9 @@ const statistics = {
       }
     })
 
-    fetch('https://services.minbrowser.org/stats/v1/collect', {
+    // Statistics collection disabled for Useful Browser
+    // To enable, set up your own analytics endpoint and uncomment
+    /* fetch('https://services.usefulventures.co/stats/v1/collect', {
       method: 'post',
       headers: {
         'Content-Type': 'application/json'
@@ -69,7 +71,7 @@ const statistics = {
         }
         settings.set('usageData', null)
       })
-      .catch(e => console.warn('failed to send usage statistics', e))
+      .catch(e => console.warn('failed to send usage statistics', e)) */
   },
   initialize: function () {
     setTimeout(statistics.upload, 10000)

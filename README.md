@@ -1,4 +1,4 @@
-# Browser
+# Useful Browser
 
 **A browser that thinks the way you do.**
 
@@ -9,9 +9,9 @@ The ADHD-friendly browser. Open source and free forever.
 
 ---
 
-## What is Browser?
+## What is Useful Browser?
 
-Browser is a minimal, tree-based web browser built for minds that wander on purpose. Instead of drowning in 50 tabs or losing your train of thought, Browser keeps your browsing history as a visual tree—so you can see exactly how you got here and easily find your way back.
+Useful Browser is a minimal, tree-based web browser built for minds that wander on purpose. Instead of drowning in 50 tabs or losing your train of thought, Browser keeps your browsing history as a visual tree—so you can see exactly how you got here and easily find your way back.
 
 Built by [Useful Ventures](https://usefulventures.co).
 
@@ -41,10 +41,6 @@ No clutter. No distractions. Just your content and your path. Everything else ge
 - **Password manager integration** — Works with Bitwarden, 1Password, and macOS Keychain
 - **Dark theme** — Easy on the eyes, follows system preferences
 - **Userscript support** — Extend functionality with custom scripts
-
-## Screenshots
-
-<img alt="Tree-based navigation with breadcrumb history" src="http://minbrowser.org/tour/img/tasks.png" width="650"/>
 
 ## Who is this for?
 
@@ -76,7 +72,7 @@ Download and run the installer.
 
 ## Developing
 
-Browser is built on [Electron](https://www.electronjs.org/) and uses vanilla JavaScript with Browserify for module bundling.
+Useful Browser is built on [Electron](https://www.electronjs.org/) and uses vanilla JavaScript with Browserify for module bundling.
 
 ### Prerequisites
 
@@ -154,7 +150,7 @@ We're building this in public and want contributors.
 
 ### Translations
 
-Browser supports 20+ languages. To add or update a translation:
+Useful Browser supports 20+ languages. To add or update a translation:
 
 1. Find your language code from [Chromium's list](https://source.chromium.org/chromium/chromium/src/+/main:ui/base/l10n/l10n_util.cc;l=68-259)
 2. Copy `localization/languages/en-US.json` to `[your-language-code].json`
@@ -163,7 +159,7 @@ Browser supports 20+ languages. To add or update a translation:
 
 ## Open source
 
-Browser is **MIT licensed** and free forever. Use it, fork it, make it yours.
+Useful Browser is **MIT licensed** and free forever. Use it, fork it, make it yours.
 
 | | |
 |---|---|
@@ -180,7 +176,7 @@ Need support, training, or custom features? We'll build it.
 
 ## Acknowledgments
 
-Browser is built on top of [Min Browser](https://github.com/minbrowser/min), a fast, minimal browser by [@pfroud](https://github.com/pfroud) and contributors. We're grateful for their work in creating a solid, privacy-focused foundation.
+Useful Browser is built on top of [Min Browser](https://github.com/minbrowser/min), a fast, minimal browser by [@pfroud](https://github.com/pfroud) and contributors. We're grateful for their work in creating a solid, privacy-focused foundation.
 
 ---
 

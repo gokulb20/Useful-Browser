@@ -20,13 +20,13 @@ const {
 } = electron
 
 crashReporter.start({
-  submitURL: 'https://minbrowser.org/',
+  submitURL: 'https://usefulventures.co/browser/crash-reports',
   uploadToServer: false,
   compress: true
 })
 
 if (process.argv.some(arg => arg === '-v' || arg === '--version')) {
-  console.log('Min: ' + app.getVersion())
+  console.log('Useful Browser: ' + app.getVersion())
   console.log('Chromium: ' + process.versions.chrome)
   process.exit()
 }
@@ -71,7 +71,7 @@ if (settings.get('userSelectedLanguage')) {
   app.commandLine.appendSwitch('lang', settings.get('userSelectedLanguage'))
 }
 
-const browserPage = 'min://app/index.html'
+const browserPage = 'useful://app/index.html'
 
 var mainMenu = null
 var secondaryMenu = null
@@ -520,7 +520,7 @@ function getWindowWebContents (win) {
 
 /* translate service */
 
-const translatePage = 'min://app/pages/translateService/index.html'
+const translatePage = 'useful://app/pages/translateService/index.html'
 const translatePreload = __dirname + '/pages/translateService/translateServicePreload.js'
 
 app.on('ready', function() {
