@@ -185,20 +185,14 @@
 
     <!-- Branch Browser: Sidebar (fixed position, doesn't wrap webviews) -->
     <div id="branch-sidebar">
-      <!-- Toolbar with icons -->
-      <div id="sidebar-toolbar">
-        <button id="toggle-sidebar-btn" class="toolbar-button" title="Toggle sidebar">◀</button>
-        <button id="new-branch-btn" class="toolbar-button" title="New branch">+</button>
-      </div>
-
-      <!-- URL/Search input bar -->
+      <!-- URL/Search bar with new tab button -->
       <div id="sidebar-url-bar">
         <input id="sidebar-url-input" type="text" placeholder="Search or enter URL..." spellcheck="false" />
+        <button id="new-tab-btn" class="new-tab-button" title="New tab">+</button>
       </div>
 
-      <!-- Pinned sites section -->
+      <!-- Pinned sites grid (max 6 icons) -->
       <div id="pinned-section">
-        <div class="section-header">PINNED</div>
         <div id="pinned-sites"></div>
       </div>
 
@@ -207,8 +201,10 @@
         <div id="branch-tree"></div>
       </div>
 
-      <div id="branch-status">
-        <span id="branch-count">0 branches</span>
+      <!-- Hidden toolbar buttons (for backward compatibility) -->
+      <div id="sidebar-toolbar" hidden>
+        <button id="toggle-sidebar-btn" class="toolbar-button" title="Toggle sidebar">◀</button>
+        <button id="new-branch-btn" class="toolbar-button" title="New branch">+</button>
       </div>
     </div>
 

@@ -1,5 +1,5 @@
-/* Branch Browser - Apple/Arc/Horse-style Dark Sidebar */
-/* Design: Invisible until needed, alive when touched */
+/* Branch Browser - Arc-inspired Glassmorphism Sidebar */
+/* Design: ADHD-friendly, minimal, subtle animations */
 
 /* =========================================
    HIDE STARTUP SEARCHBAR
@@ -15,7 +15,7 @@ body.is-ntp #searchbar {
 }
 
 /* =========================================
-   SIDEBAR CONTAINER - Subtle gradient depth
+   SIDEBAR CONTAINER - Glassmorphism
    ========================================= */
 
 #branch-sidebar {
@@ -24,9 +24,13 @@ body.is-ntp #searchbar {
   left: 0;
   bottom: 0;
   width: 260px;
-  background: linear-gradient(180deg, #1a1a1e 0%, #151518 100%);
+  background: rgba(18, 18, 22, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 0 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   display: flex;
   flex-direction: column;
   z-index: 2;
@@ -37,65 +41,22 @@ body.is-ntp #searchbar {
 }
 
 /* =========================================
-   TOOLBAR - Haptic-like buttons
-   ========================================= */
-
-#sidebar-toolbar {
-  display: none;  /* Hidden - buttons moved to header */
-}
-
-.toolbar-button {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  cursor: pointer;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 14px;
-  font-weight: 400;
-  background: transparent;
-  border: none;
-  transition:
-    background 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.toolbar-button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
-}
-
-.toolbar-button:active {
-  background: rgba(255, 255, 255, 0.06);
-  transform: translateY(0) scale(0.95);
-  box-shadow: none;
-}
-
-#new-branch-button {
-  display: none;
-}
-
-/* =========================================
-   URL/SEARCH INPUT - Animated focus ring
+   URL/SEARCH BAR WITH NEW TAB BUTTON
    ========================================= */
 
 #sidebar-url-bar {
-  padding: 0 12px 10px 12px;
-  margin-top: 8px;  /* Push down to make autocomplete dropdown visible */
+  padding: 12px 12px 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #sidebar-url-input {
-  width: 100%;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid transparent;
-  border-radius: 8px;
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
   color: rgba(255, 255, 255, 0.9);
   font-size: 13px;
   font-family: inherit;
@@ -104,7 +65,7 @@ body.is-ntp #searchbar {
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
-    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow 0.2s ease;
 }
 
 #sidebar-url-input::placeholder {
@@ -112,23 +73,174 @@ body.is-ntp #searchbar {
 }
 
 #sidebar-url-input:focus {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05);
+}
+
+/* New Tab Button - Subtle + sign */
+.new-tab-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 20px;
+  font-weight: 300;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.new-tab-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.new-tab-button:active {
+  transform: scale(0.95);
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(100, 150, 255, 0.5);
-  box-shadow:
-    0 0 0 3px rgba(100, 150, 255, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* =========================================
-   HIDE SECTION HEADERS
+   PINNED SITES GRID - Adaptive Layout
    ========================================= */
 
-.section-header {
+#pinned-section {
+  padding: 0 12px 12px 12px;
+}
+
+#pinned-section:empty,
+#pinned-section:not(:has(.pinned-icon-item)) {
   display: none;
 }
 
-#pinned-section {
-  display: none;
+#pinned-sites {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Dynamic grid based on icon count */
+#pinned-sites[data-count="1"] {
+  grid-template-columns: 1fr;
+  max-width: 80px;
+  margin: 0 auto;
+}
+
+#pinned-sites[data-count="2"] {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 120px;
+  margin: 0 auto;
+}
+
+#pinned-sites[data-count="3"] {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 160px;
+  margin: 0 auto;
+}
+
+#pinned-sites[data-count="4"],
+#pinned-sites[data-count="5"],
+#pinned-sites[data-count="6"] {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 160px;
+  margin: 0 auto;
+}
+
+/* Pinned Icon Item */
+.pinned-icon-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 12px;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.pinned-icon-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: scale(1.05);
+}
+
+.pinned-icon-item:active {
+  transform: scale(0.95);
+}
+
+/* Single icon - larger size */
+#pinned-sites[data-count="1"] .pinned-icon-item {
+  width: 64px;
+  height: 64px;
+  padding: 12px;
+}
+
+#pinned-sites[data-count="1"] .pinned-icon-item img,
+#pinned-sites[data-count="1"] .pinned-icon-item .pinned-fallback {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+/* 2-3 icons - medium size */
+#pinned-sites[data-count="2"] .pinned-icon-item,
+#pinned-sites[data-count="3"] .pinned-icon-item {
+  width: 48px;
+  height: 48px;
+  padding: 8px;
+}
+
+#pinned-sites[data-count="2"] .pinned-icon-item img,
+#pinned-sites[data-count="2"] .pinned-icon-item .pinned-fallback,
+#pinned-sites[data-count="3"] .pinned-icon-item img,
+#pinned-sites[data-count="3"] .pinned-icon-item .pinned-fallback {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+/* 4-6 icons - smaller size */
+#pinned-sites[data-count="4"] .pinned-icon-item,
+#pinned-sites[data-count="5"] .pinned-icon-item,
+#pinned-sites[data-count="6"] .pinned-icon-item {
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+}
+
+#pinned-sites[data-count="4"] .pinned-icon-item img,
+#pinned-sites[data-count="4"] .pinned-icon-item .pinned-fallback,
+#pinned-sites[data-count="5"] .pinned-icon-item img,
+#pinned-sites[data-count="5"] .pinned-icon-item .pinned-fallback,
+#pinned-sites[data-count="6"] .pinned-icon-item img,
+#pinned-sites[data-count="6"] .pinned-icon-item .pinned-fallback {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+
+.pinned-icon-item img {
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pinned-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* =========================================
@@ -141,157 +253,132 @@ body.is-ntp #searchbar {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 #branch-tree {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 8px;
+  padding: 8px;
 }
 
 /* Empty state */
 #branch-tree:empty::after {
-  content: "No branches yet";
+  content: "No open tabs";
   display: block;
   text-align: center;
-  padding: 48px 20px;
+  padding: 40px 20px;
   color: rgba(255, 255, 255, 0.2);
   font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
 }
 
 /* =========================================
-   BRANCH ITEM - Lift effect on hover
+   BRANCH ITEM - Subtle hover effect
    ========================================= */
 
 .branch-item {
   display: flex;
   align-items: center;
-  padding: 6px 8px;
-  padding-right: 28px;
+  padding: 8px 10px;
+  padding-right: 32px;
   cursor: pointer;
-  border-radius: 6px;
-  margin: 1px 0;
+  border-radius: 8px;
+  margin: 2px 0;
   position: relative;
-  min-height: 32px;
+  min-height: 36px;
   transition:
-    background 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    background 0.15s ease,
+    transform 0.1s ease;
 }
 
 .branch-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  transform: translateX(2px);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
-/* Active branch - Arc-style accent bar */
+/* Active branch - subtle left accent */
 .branch-item.active {
-  background: rgba(100, 150, 255, 0.08);
-  box-shadow:
-    inset 3px 0 0 rgba(100, 150, 255, 0.7),
-    0 0 12px rgba(100, 150, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.branch-item.active:hover {
-  background: rgba(100, 150, 255, 0.12);
-}
-
-/* Entry animation for new branches */
-@keyframes branchSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.branch-item {
-  animation: branchSlideIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+.branch-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 2px;
 }
 
 /* =========================================
-   CLOSE BUTTON - Scale + color transition
+   CLOSE BUTTON
    ========================================= */
 
 .branch-close-btn {
   position: absolute;
-  right: 6px;
+  right: 8px;
   top: 50%;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
   border: none;
   border-radius: 4px;
-  color: rgba(255, 255, 255, 0.25);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
   cursor: pointer;
   padding: 0;
   line-height: 1;
   opacity: 0;
-  transform: translateY(-50%) scale(0.85);
+  transform: translateY(-50%);
   transition:
-    opacity 0.12s ease,
-    transform 0.12s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.12s ease,
-    color 0.12s ease;
+    opacity 0.1s ease,
+    background 0.1s ease,
+    color 0.1s ease;
 }
 
 .branch-item:hover .branch-close-btn {
   opacity: 1;
-  transform: translateY(-50%) scale(1);
 }
 
 .branch-close-btn:hover {
-  transform: translateY(-50%) scale(1.1);
-  background: rgba(255, 80, 80, 0.12);
-  color: rgba(255, 120, 120, 1);
-}
-
-.branch-close-btn:active {
-  transform: translateY(-50%) scale(0.95);
-  background: rgba(255, 80, 80, 0.2);
+  background: rgba(255, 100, 100, 0.15);
+  color: rgba(255, 150, 150, 1);
 }
 
 /* =========================================
    INDENTATION - Tree structure
    ========================================= */
 
-.branch-item[data-depth="0"] { padding-left: 8px; }
-.branch-item[data-depth="1"] { padding-left: 22px; }
-.branch-item[data-depth="2"] { padding-left: 36px; }
-.branch-item[data-depth="3"] { padding-left: 50px; }
-.branch-item[data-depth="4"] { padding-left: 64px; }
-.branch-item[data-depth="5"] { padding-left: 78px; }
+.branch-item[data-depth="0"] { padding-left: 10px; }
+.branch-item[data-depth="1"] { padding-left: 24px; }
+.branch-item[data-depth="2"] { padding-left: 38px; }
+.branch-item[data-depth="3"] { padding-left: 52px; }
+.branch-item[data-depth="4"] { padding-left: 66px; }
+.branch-item[data-depth="5"] { padding-left: 80px; }
 
 /* Subtle indent guides */
-.branch-item[data-depth]:not([data-depth="0"])::before {
+.branch-item[data-depth]:not([data-depth="0"])::after {
   content: "";
   position: absolute;
-  top: 6px;
-  bottom: 6px;
+  top: 10px;
+  bottom: 10px;
   width: 1px;
   background: rgba(255, 255, 255, 0.04);
-  border-radius: 1px;
 }
 
-.branch-item[data-depth="1"]::before { left: 13px; }
-.branch-item[data-depth="2"]::before { left: 27px; }
-.branch-item[data-depth="3"]::before { left: 41px; }
-.branch-item[data-depth="4"]::before { left: 55px; }
-.branch-item[data-depth="5"]::before { left: 69px; }
+.branch-item[data-depth="1"]::after { left: 14px; }
+.branch-item[data-depth="2"]::after { left: 28px; }
+.branch-item[data-depth="3"]::after { left: 42px; }
+.branch-item[data-depth="4"]::after { left: 56px; }
+.branch-item[data-depth="5"]::after { left: 70px; }
 
 /* =========================================
-   COLLAPSE TOGGLE - Spring rotation
+   COLLAPSE TOGGLE
    ========================================= */
 
 .branch-toggle {
@@ -300,43 +387,31 @@ body.is-ntp #searchbar {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 4px;
+  margin-right: 6px;
   color: rgba(255, 255, 255, 0.3);
   flex-shrink: 0;
-}
-
-.branch-toggle::before {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.branch-toggle:hover {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.branch-toggle:hover::before {
-  transform: scale(1.15);
+  font-size: 12px;
 }
 
 .branch-toggle.has-children {
   cursor: pointer;
 }
 
+.branch-toggle.has-children:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
 .branch-toggle.collapsed::before {
   content: "›";
-  font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
+  transition: transform 0.15s ease;
 }
 
 .branch-toggle.expanded::before {
   content: "›";
-  font-size: 14px;
-  font-weight: 300;
+  font-weight: 400;
   transform: rotate(90deg);
   display: inline-block;
-}
-
-.branch-toggle.expanded:hover::before {
-  transform: rotate(90deg) scale(1.15);
 }
 
 .branch-toggle.no-children {
@@ -344,38 +419,35 @@ body.is-ntp #searchbar {
 }
 
 /* =========================================
-   FAVICON - Subtle depth
+   FAVICON
    ========================================= */
 
 .branch-favicon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
   flex-shrink: 0;
   border-radius: 4px;
   overflow: hidden;
 }
 
 .branch-favicon img {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  border: 0.5px solid rgba(255, 255, 255, 0.06);
 }
 
 .branch-favicon .fallback-icon {
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
   font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* =========================================
@@ -401,12 +473,11 @@ body.is-ntp #searchbar {
   white-space: nowrap;
   flex-shrink: 1;
   min-width: 0;
-  letter-spacing: 0.01em;
 }
 
 .branch-source {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -420,7 +491,7 @@ body.is-ntp #searchbar {
    ========================================= */
 
 .branch-item.sleeping {
-  opacity: 0.45;
+  opacity: 0.5;
 }
 
 .branch-item.sleeping .branch-title {
@@ -432,23 +503,7 @@ body.is-ntp #searchbar {
 }
 
 /* =========================================
-   STATUS BAR
-   ========================================= */
-
-#branch-status {
-  padding: 10px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.25);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-
-/* =========================================
-   SCROLLBAR - Fade on hover
+   SCROLLBAR - Minimal
    ========================================= */
 
 #branch-tree::-webkit-scrollbar {
@@ -462,7 +517,6 @@ body.is-ntp #searchbar {
 #branch-tree::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 3px;
-  transition: background 0.3s ease;
 }
 
 #branch-tree:hover::-webkit-scrollbar-thumb {
@@ -470,36 +524,35 @@ body.is-ntp #searchbar {
 }
 
 #branch-tree::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* =========================================
-   CONTEXT MENU - Entrance animation
+   CONTEXT MENU
    ========================================= */
 
 .branch-context-menu {
   position: fixed;
-  background: #222225;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 30, 35, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   padding: 4px 0;
   min-width: 160px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 1000;
-  animation: contextMenuIn 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: top left;
+  animation: contextFadeIn 0.1s ease;
 }
 
-@keyframes contextMenuIn {
+@keyframes contextFadeIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-4px);
+    transform: scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
@@ -515,7 +568,7 @@ body.is-ntp #searchbar {
 }
 
 .branch-context-menu-item:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .branch-context-menu-item i {
@@ -538,7 +591,7 @@ body.is-ntp #searchbar {
   min-width: 0;
   border-right: none;
   overflow: hidden;
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.2s ease;
 }
 
 #branch-sidebar.collapsed > * {
@@ -548,7 +601,7 @@ body.is-ntp #searchbar {
 }
 
 #branch-sidebar:not(.collapsed) {
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.2s ease;
 }
 
 body:has(#branch-sidebar.collapsed) #searchbar {
@@ -566,35 +619,51 @@ body:has(#branch-sidebar.collapsed) #searchbar {
   left: 8px;
   width: 32px;
   height: 32px;
-  background: rgba(26, 26, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(18, 18, 22, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   transition:
     background 0.15s ease,
-    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.15s ease;
+    color 0.15s ease;
 }
 
 .floating-expand-btn:hover {
-  background: rgba(40, 40, 45, 0.98);
-  color: rgba(255, 255, 255, 0.9);
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
-}
-
-.floating-expand-btn:active {
-  transform: scale(0.95);
+  background: rgba(30, 30, 35, 0.95);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .floating-expand-btn[hidden] {
+  display: none;
+}
+
+/* =========================================
+   HIDDEN ELEMENTS
+   ========================================= */
+
+#sidebar-toolbar[hidden] {
+  display: none;
+}
+
+#branch-status {
+  display: none;
+}
+
+.section-header {
+  display: none;
+}
+
+/* Legacy pinned item styles (hidden, replaced by icon grid) */
+.pinned-item {
   display: none;
 }
 
@@ -607,50 +676,40 @@ body:has(#branch-sidebar.collapsed) #searchbar {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
 /* =========================================
-   HEADER BUTTONS - Arc-style
+   TOOLBAR BUTTON (legacy, now hidden)
+   ========================================= */
+
+.toolbar-button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.toolbar-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* =========================================
+   HEADER BUTTONS (unused, kept for compat)
    ========================================= */
 
 .header-branch-btn {
-  font-size: 16px;
-  font-weight: 500;
-  color: inherit;  /* Inherit from theme */
-  opacity: 0.7;
-  background: transparent;
-  border: none;
-  width: 32px;
-  height: 36px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.15s ease,
-    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-branch-btn:hover {
-  background: rgba(128, 128, 128, 0.15);
-  opacity: 1;
-}
-
-.header-branch-btn:active {
-  background: rgba(128, 128, 128, 0.2);
-  transform: scale(0.95);
-}
-
-#header-toggle-sidebar-btn {
-  font-size: 14px;
-}
-
-#header-new-branch-btn {
-  font-size: 22px;
-  font-weight: 300;
+  display: none;
 }

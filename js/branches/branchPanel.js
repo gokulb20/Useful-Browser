@@ -33,6 +33,8 @@ console.log('[BranchPanel] browserUI.closeTab:', typeof browserUI.closeTab)
 
 var SIDEBAR_WIDTH = 260
 
+var MAX_PINNED_SITES = 6
+
 var branchPanel = {
   container: null,
   treeContainer: null,
@@ -42,6 +44,7 @@ var branchPanel = {
   pinnedContainer: null,
   newBranchButton: null,
   newBranchBtn: null,
+  newTabBtn: null,
   collapseAllBtn: null,
   expandAllBtn: null,
   toggleSidebarBtn: null,
@@ -60,12 +63,14 @@ var branchPanel = {
     this.pageTitleContainer = document.getElementById('current-page-title')
     this.pinnedContainer = document.getElementById('pinned-sites')
     this.newBranchButton = document.getElementById('new-branch-button')
-    // Toolbar buttons
+    // Toolbar buttons (legacy, now hidden)
     this.newBranchBtn = document.getElementById('new-branch-btn')
     this.collapseAllBtn = document.getElementById('collapse-all-btn')
     this.expandAllBtn = document.getElementById('expand-all-btn')
     this.toggleSidebarBtn = document.getElementById('toggle-sidebar-btn')
     this.expandSidebarBtn = document.getElementById('sidebar-expand-btn')
+    // New tab button (next to URL bar)
+    this.newTabBtn = document.getElementById('new-tab-btn')
     this.urlInput = document.getElementById('sidebar-url-input')
 
     if (!this.container || !this.treeContainer) {
@@ -139,11 +144,22 @@ var branchPanel = {
       })
     }
 
-    // Toolbar: New Branch button
+    // Toolbar: New Branch button (legacy, now hidden)
     if (this.newBranchBtn) {
-      console.log('[BranchPanel] Attaching new branch toolbar button handler')
       this.newBranchBtn.addEventListener('click', function () {
-        console.log('[BranchPanel] New branch toolbar button clicked')
+        try {
+          browserUI.addTab()
+        } catch (e) {
+          console.error('[BranchPanel] browserUI.addTab() failed:', e)
+        }
+      })
+    }
+
+    // New Tab button (next to URL bar)
+    if (this.newTabBtn) {
+      console.log('[BranchPanel] Attaching new tab button handler')
+      this.newTabBtn.addEventListener('click', function () {
+        console.log('[BranchPanel] New tab button clicked')
         try {
           browserUI.addTab()
           console.log('[BranchPanel] browserUI.addTab() succeeded')
@@ -152,7 +168,7 @@ var branchPanel = {
         }
       })
     } else {
-      console.warn('[BranchPanel] New branch button not found!')
+      console.warn('[BranchPanel] New tab button not found!')
     }
 
     // Toolbar: Collapse All button
@@ -572,22 +588,44 @@ var branchPanel = {
       this.pinnedContainer.removeChild(this.pinnedContainer.firstChild)
     }
 
+    // Limit to max 6 pinned sites
+    var sitesToRender = this.pinnedSites.slice(0, MAX_PINNED_SITES)
+    var count = sitesToRender.length
+
+    // Set data-count attribute for CSS grid styling
+    this.pinnedContainer.setAttribute('data-count', count)
+
+    if (count === 0) {
+      return
+    }
+
     var self = this
-    this.pinnedSites.forEach(function (site, index) {
+    sitesToRender.forEach(function (site, index) {
       var item = document.createElement('div')
-      item.className = 'pinned-item'
+      item.className = 'pinned-icon-item'
+      item.title = site.title || self.getUrlDomain(site.url)
 
-      // Favicon or pin icon
-      var icon = document.createElement('span')
-      icon.className = 'pinned-icon'
-      icon.textContent = '\uD83D\uDCCC' // Pin emoji
-      item.appendChild(icon)
-
-      // Title
-      var title = document.createElement('span')
-      title.className = 'pinned-title'
-      title.textContent = site.title || self.getUrlDomain(site.url)
-      item.appendChild(title)
+      // Favicon image or fallback
+      var faviconUrl = self.getFaviconUrl(site.url)
+      if (faviconUrl) {
+        var img = document.createElement('img')
+        img.src = faviconUrl
+        img.alt = site.title || ''
+        img.onerror = function () {
+          // Replace with fallback on error
+          item.innerHTML = ''
+          var fallback = document.createElement('div')
+          fallback.className = 'pinned-fallback'
+          fallback.textContent = self.getFirstLetter(site.title || self.getUrlDomain(site.url))
+          item.appendChild(fallback)
+        }
+        item.appendChild(img)
+      } else {
+        var fallback = document.createElement('div')
+        fallback.className = 'pinned-fallback'
+        fallback.textContent = self.getFirstLetter(site.title || self.getUrlDomain(site.url))
+        item.appendChild(fallback)
+      }
 
       // Click to open
       item.addEventListener('click', function () {
@@ -610,6 +648,12 @@ var branchPanel = {
   },
 
   pinBranch: function (branch) {
+    // Check if already at max capacity
+    if (this.pinnedSites.length >= MAX_PINNED_SITES) {
+      console.log('[BranchPanel] Cannot pin - max ' + MAX_PINNED_SITES + ' sites reached')
+      return
+    }
+
     // Add to pinned sites if not already pinned
     var exists = this.pinnedSites.some(function (site) {
       return site.url === branch.url
@@ -879,14 +923,30 @@ var branchPanel = {
     var menu = document.createElement('div')
     menu.className = 'branch-context-menu'
 
+    // Check if already pinned or at max capacity
+    var isAlreadyPinned = this.pinnedSites.some(function (site) {
+      return site.url === branch.url
+    })
+    var atMaxCapacity = this.pinnedSites.length >= MAX_PINNED_SITES
+
     // Pin option
     var pinItem = document.createElement('div')
     pinItem.className = 'branch-context-menu-item'
-    pinItem.innerHTML = '<i class="i carbon:pin"></i> Pin to Sidebar'
-    pinItem.addEventListener('click', function () {
-      self.pinBranch(branch)
-      self.closeContextMenu()
-    })
+    if (isAlreadyPinned) {
+      pinItem.innerHTML = '<i class="i carbon:pin-filled"></i> Already Pinned'
+      pinItem.style.opacity = '0.5'
+      pinItem.style.cursor = 'default'
+    } else if (atMaxCapacity) {
+      pinItem.innerHTML = '<i class="i carbon:pin"></i> Max Pins Reached'
+      pinItem.style.opacity = '0.5'
+      pinItem.style.cursor = 'default'
+    } else {
+      pinItem.innerHTML = '<i class="i carbon:pin"></i> Pin to Sidebar'
+      pinItem.addEventListener('click', function () {
+        self.pinBranch(branch)
+        self.closeContextMenu()
+      })
+    }
     menu.appendChild(pinItem)
 
     // Separator
