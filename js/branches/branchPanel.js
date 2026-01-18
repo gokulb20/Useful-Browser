@@ -516,6 +516,7 @@ var branchPanel = {
       // Delay render to let branchEvents.js create the branch first
       setTimeout(function () {
         self.render()
+        self.renderPinnedSites() // Update favorite indicators
         self.updateBreadcrumbs()
       }, 50)
     })
@@ -526,6 +527,7 @@ var branchPanel = {
       setTimeout(function () {
         self.clearStaleBranches()
         self.render()
+        self.renderPinnedSites() // Update favorite indicators
         self.updateBreadcrumbs()
       }, 100)
     })
@@ -547,12 +549,14 @@ var branchPanel = {
           }
         }
         self.render()
+        self.renderPinnedSites() // Update favorite indicators (URL changed)
         self.updateBreadcrumbs()
       }
     })
 
     tasks.on('tab-selected', function () {
       self.updateActiveIndicator()
+      self.renderPinnedSites() // Update favorite indicators (active state)
       self.updateBreadcrumbs()
     })
   },
@@ -767,6 +771,16 @@ var branchPanel = {
         item.appendChild(fallback)
       }
 
+      // Visual indicator: check if this favorite is currently open
+      var selectedTabId = safeTabs() ? safeTabs().getSelected() : null
+      var openTab = self.findTabByUrl(site.url)
+      if (openTab) {
+        item.classList.add('is-open')
+        if (openTab.id === selectedTabId) {
+          item.classList.add('is-active')
+        }
+      }
+
       // Click to open
       item.addEventListener('click', function () {
         self.openPinnedSite(site)
@@ -783,8 +797,32 @@ var branchPanel = {
   },
 
   openPinnedSite: function (site) {
-    // Create new tab with pinned URL
-    browserUI.addTab(null, { url: site.url })
+    // Smart switch: if URL already open, switch to it; otherwise open new
+    var existingTab = this.findTabByUrl(site.url)
+    if (existingTab) {
+      console.log('[BranchPanel] Switching to existing tab for:', site.url)
+      browserUI.switchToTab(existingTab.id)
+    } else {
+      console.log('[BranchPanel] Opening new tab for:', site.url)
+      browserUI.addTab(null, { url: site.url })
+    }
+  },
+
+  // Find an existing tab by URL (for smart switching)
+  findTabByUrl: function (url) {
+    var normalizedUrl = this.normalizeUrlForComparison(url)
+    var allTabs = tabs.get()
+    var self = this
+    return allTabs.find(function (tab) {
+      return self.normalizeUrlForComparison(tab.url) === normalizedUrl
+    })
+  },
+
+  // Normalize URL for comparison (remove fragments, trailing slashes)
+  normalizeUrlForComparison: function (url) {
+    if (!url) return ''
+    // Remove hash/fragment and trailing slash for comparison
+    return url.split('#')[0].replace(/\/$/, '')
   },
 
   pinBranch: function (branch) {

@@ -116,6 +116,28 @@ body.is-ntp #searchbar {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+/* Visual indicators for open/active favorites */
+.pinned-icon-item {
+  position: relative;
+}
+
+.pinned-icon-item.is-open::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+.pinned-icon-item.is-active::after {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
 /* =========================================
    BRANCHES SECTION
    ========================================= */
