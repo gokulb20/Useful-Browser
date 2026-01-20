@@ -1181,13 +1181,27 @@ var branchPanel = {
     document.body.appendChild(menu)
     this.contextMenu = menu
 
-    // Adjust if off screen
+    // Adjust if off screen, considering sidebar state
     var rect = menu.getBoundingClientRect()
-    if (rect.right > window.innerWidth) {
-      menu.style.left = (x - rect.width) + 'px'
+    var sidebar = document.getElementById('branch-sidebar')
+    var sidebarWidth = 0
+    if (sidebar && !sidebar.classList.contains('collapsed')) {
+      // Get actual sidebar width
+      sidebarWidth = sidebar.offsetWidth
     }
-    if (rect.bottom > window.innerHeight) {
-      menu.style.top = (y - rect.height) + 'px'
+    var availableWidth = window.innerWidth - sidebarWidth
+    var availableHeight = window.innerHeight
+
+    // Adjust horizontally if would overflow
+    if (rect.right > window.innerWidth) {
+      menu.style.left = Math.max(sidebarWidth, x - rect.width) + 'px'
+    } else if (rect.left < sidebarWidth) {
+      menu.style.left = sidebarWidth + 'px'
+    }
+
+    // Adjust vertically if would overflow
+    if (rect.bottom > availableHeight) {
+      menu.style.top = Math.max(0, y - rect.height) + 'px'
     }
   },
 
@@ -1213,6 +1227,29 @@ var branchPanel = {
     menu.style.top = y + 'px'
     document.body.appendChild(menu)
     this.contextMenu = menu
+
+    // Adjust if off screen, considering sidebar state
+    var rect = menu.getBoundingClientRect()
+    var sidebar = document.getElementById('branch-sidebar')
+    var sidebarWidth = 0
+    if (sidebar && !sidebar.classList.contains('collapsed')) {
+      // Get actual sidebar width
+      sidebarWidth = sidebar.offsetWidth
+    }
+    var availableWidth = window.innerWidth - sidebarWidth
+    var availableHeight = window.innerHeight
+
+    // Adjust horizontally if would overflow
+    if (rect.right > window.innerWidth) {
+      menu.style.left = Math.max(sidebarWidth, x - rect.width) + 'px'
+    } else if (rect.left < sidebarWidth) {
+      menu.style.left = sidebarWidth + 'px'
+    }
+
+    // Adjust vertically if would overflow
+    if (rect.bottom > availableHeight) {
+      menu.style.top = Math.max(0, y - rect.height) + 'px'
+    }
   },
 
   showBreadcrumbContextMenu: function (x, y) {
@@ -1259,13 +1296,27 @@ var branchPanel = {
     document.body.appendChild(menu)
     this.contextMenu = menu
 
-    // Adjust if off screen
+    // Adjust if off screen, considering sidebar state
     var rect = menu.getBoundingClientRect()
-    if (rect.right > window.innerWidth) {
-      menu.style.left = (x - rect.width) + 'px'
+    var sidebar = document.getElementById('branch-sidebar')
+    var sidebarWidth = 0
+    if (sidebar && !sidebar.classList.contains('collapsed')) {
+      // Get actual sidebar width
+      sidebarWidth = sidebar.offsetWidth
     }
-    if (rect.bottom > window.innerHeight) {
-      menu.style.top = (y - rect.height) + 'px'
+    var availableWidth = window.innerWidth - sidebarWidth
+    var availableHeight = window.innerHeight
+
+    // Adjust horizontally if would overflow
+    if (rect.right > window.innerWidth) {
+      menu.style.left = Math.max(sidebarWidth, x - rect.width) + 'px'
+    } else if (rect.left < sidebarWidth) {
+      menu.style.left = sidebarWidth + 'px'
+    }
+
+    // Adjust vertically if would overflow
+    if (rect.bottom > availableHeight) {
+      menu.style.top = Math.max(0, y - rect.height) + 'px'
     }
   },
 
