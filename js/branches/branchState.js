@@ -352,6 +352,17 @@ async function loadFromDB () {
   try {
     var storedBranches = await database.branches.toArray()
     storedBranches.forEach(function (branch) {
+      // Trim bloated history arrays before storing in memory
+      if (branch.history && branch.history.length > 50) {
+        var trimCount = branch.history.length - 50
+        branch.history = branch.history.slice(-50)
+        
+        // Adjust historyIndex if out of bounds after trimming
+        if (branch.historyIndex !== undefined && branch.historyIndex !== null) {
+          branch.historyIndex = Math.max(0, branch.historyIndex - trimCount)
+        }
+      }
+      
       branches[branch.id] = branch
     })
     console.log('[Branch] Loaded', storedBranches.length, 'branches from database')
