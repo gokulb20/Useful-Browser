@@ -1026,10 +1026,26 @@ var branchPanel = {
     var tabId = branch.tabId
 
     // Check if the tab actually exists
-    var tabExists = tabId && tabs.get(tabId)
-    console.log('[BranchPanel] Tab exists:', tabExists, 'tabId:', tabId)
+    var tab = tabId && tabs.get(tabId)
+    console.log('[BranchPanel] Tab exists:', !!tab, 'tabId:', tabId)
 
-    if (tabExists) {
+    if (tab) {
+      // Verify tab belongs to current task
+      var currentTask = tasks.getSelected()
+      var tabInCurrentTask = currentTask && currentTask.tabs.get(tabId)
+      
+      if (!tabInCurrentTask) {
+        console.warn('[BranchPanel] Tab', tabId, 'exists but not in current task context')
+        // Tab exists but not in current task - navigate to URL instead
+        if (branch.url) {
+          console.log('[BranchPanel] Navigating to URL instead:', branch.url)
+          this.navigateToUrl(branch.url)
+        } else {
+          console.warn('[BranchPanel] Branch has no URL to navigate to')
+        }
+        return
+      }
+
       // Ensure tabId is a string (not an object)
       if (typeof tabId !== 'string') {
         console.warn('[BranchPanel] tabId is not a string:', typeof tabId, tabId)
