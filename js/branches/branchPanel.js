@@ -1051,12 +1051,29 @@ var branchPanel = {
         }
       }
 
-      console.log('[BranchPanel] Switching to existing tab:', tabId)
-      try {
-        browserUI.switchToTab(tabId)
-        console.log('[BranchPanel] switchToTab succeeded')
-      } catch (e) {
-        console.error('[BranchPanel] switchToTab failed:', e)
+      // Verify tab belongs to current task (Bug #8 fix)
+      var currentTask = tasks.getSelected()
+      var tabTask = tasks.getTaskContainingTab(tabId)
+      var tabInCurrentTask = currentTask && tabTask && currentTask.id === tabTask.id
+
+      console.log('[BranchPanel] Task context check - current:', currentTask ? currentTask.id : 'none', 'tab task:', tabTask ? tabTask.id : 'none', 'match:', tabInCurrentTask)
+
+      if (tabInCurrentTask) {
+        console.log('[BranchPanel] Switching to existing tab:', tabId)
+        try {
+          browserUI.switchToTab(tabId)
+          console.log('[BranchPanel] switchToTab succeeded')
+        } catch (e) {
+          console.error('[BranchPanel] switchToTab failed:', e)
+        }
+      } else {
+        // Tab exists but in wrong task - navigate to URL instead
+        console.log('[BranchPanel] Tab exists but in different task, navigating to URL:', branch.url)
+        if (branch.url) {
+          this.navigateToUrl(branch.url)
+        } else {
+          console.warn('[BranchPanel] Branch has no URL to navigate to')
+        }
       }
     } else {
       // Tab doesn't exist - navigate to branch URL instead
