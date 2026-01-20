@@ -41,6 +41,12 @@ async function initialize () {
   // Load existing branches from IndexedDB
   await bs.loadFromDB()
 
+  // Clean up any orphaned branches from crashes/session restore failures
+  var bp = getBranchPanel()
+  if (bp && bp.clearStaleBranches) {
+    bp.clearStaleBranches()
+  }
+
   // Listen to tab lifecycle events
   setupEventListeners()
 

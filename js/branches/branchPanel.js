@@ -127,6 +127,12 @@ var branchPanel = {
     // Listen for tab events to update the tree
     this.setupEventListeners()
 
+    // Periodic cleanup as safety net (every 5 minutes)
+    // Catches orphans from crashes, window sync issues, etc.
+    this.cleanupInterval = setInterval(function () {
+      self.clearStaleBranches()
+    }, 300000) // 5 minutes
+
     console.log('[BranchPanel] Initialized')
   },
 
