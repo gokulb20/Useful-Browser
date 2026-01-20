@@ -635,9 +635,18 @@ var branchPanel = {
     // Add ellipsis at start if truncated
     if (startIndex > 0) {
       var ellipsis = document.createElement('span')
-      ellipsis.className = 'breadcrumb-ellipsis'
+      ellipsis.className = 'breadcrumb-ellipsis clickable'
       ellipsis.textContent = '...'
-      ellipsis.title = 'More history items'
+      ellipsis.title = 'Click to view earlier history'
+      
+      // Navigate to first history item
+      var firstEntry = history[0]
+      ;(function (url) {
+        ellipsis.addEventListener('click', function () {
+          self.navigateToBreadcrumb(branch.id, 0, url, selectedTabId)
+        })
+      })(firstEntry.url)
+      
       this.breadcrumbContainer.appendChild(ellipsis)
     }
 
@@ -682,9 +691,18 @@ var branchPanel = {
     // Add ellipsis at end if truncated
     if (endIndex < history.length - 1) {
       var ellipsisEnd = document.createElement('span')
-      ellipsisEnd.className = 'breadcrumb-ellipsis'
+      ellipsisEnd.className = 'breadcrumb-ellipsis clickable'
       ellipsisEnd.textContent = '...'
-      ellipsisEnd.title = 'More history items'
+      ellipsisEnd.title = 'Click to view later history'
+      
+      // Navigate to last history item
+      var lastEntry = history[history.length - 1]
+      ;(function (url) {
+        ellipsisEnd.addEventListener('click', function () {
+          self.navigateToBreadcrumb(branch.id, history.length - 1, url, selectedTabId)
+        })
+      })(lastEntry.url)
+      
       this.breadcrumbContainer.appendChild(ellipsisEnd)
     }
   },
